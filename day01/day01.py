@@ -26,6 +26,7 @@ def part2(ls, rs):
             out += l * rindex[l]
     return out
 
+
 if __name__ == '__main__':
     print("-- test --")
     ls, rs = get_lists("test.txt")
