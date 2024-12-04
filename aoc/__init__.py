@@ -1,49 +1,44 @@
 from dataclasses import dataclass
 from enum import Enum
 
-class Dir(Enum):
-    U = 0
-    R = 1
-    D = 2
-    L = 3
-
-    @classmethod
-    def fromstr(cls, s):
-        return cls[s]        
 
 @dataclass(frozen=True)
 class Point:
     x: int
     y: int
 
-    def __add__(self, other):
-        if not isinstance(other, Point):
-            raise TypeError
-        return Point(self.x + other.x, self.y + other.y)
+    MOVES_SQUARE = ["N", "E", "S", "W"]
+    MOVES_DIAG = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+    DELTAS = dict(
+        N =( 0, -1),
+        NE=( 1, -1),
+        E =( 1,  0),
+        SE=( 1,  1),
+        S =( 0,  1),
+        SW=(-1,  1),
+        W =(-1,  0),
+        NW=(-1, -1))
 
-    def movedir(self, dir: Dir):
-        if dir == Dir.U:
-            return Point(self.x, self.y-1)
-        elif dir == Dir.R:
-            return Point(self.x+1, self.y)
-        elif dir == Dir.D:
-            return Point(self.x, self.y+1)
-        elif dir == Dir.L:
-            return Point(self.x-1, self.y)
+    def __add__(self, other):
+        if isinstance(other, Point):
+            return Point(self.x + other.x, self.y + other.y)
+        elif isinstance(other, tuple):
+            return Point(self.x + other[0], self.y + other[1])
         else:
-            raise Exception(f"bad direction {dir}")
-    
+            raise TypeError
+
     def move(self, dir):
-        if dir == 'N':
-            return Point(self.x, self.y-1)
-        elif dir == 'E':
-            return Point(self.x+1, self.y)
-        elif dir == 'S':
-            return Point(self.x, self.y+1)
-        elif dir == 'W':
-            return Point(self.x-1, self.y)
+        if dir in type(self).DELTAS:
+            return self + type(self).DELTAS[dir]
         else:
-            raise Exception(f"bad direction {dir}")
+            raise Exception(f"bad direction '{dir}'")
+
+    def move_n(self, dir, n):
+        if dir in type(self).DELTAS:
+            curr = self
+            for _ in range(n):
+                curr = curr.move(dir)
+                yield curr
 
 class Logger:
     LEVELS = {"WARN": 0, "INFO": 1, "DEBUG": 2}
@@ -109,5 +104,3 @@ def split_xs(xs, sep):
         else:
             out[-1].append(x)
     return out
-
-
