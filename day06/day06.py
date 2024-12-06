@@ -24,7 +24,7 @@ def part2(array, loglevel: str = ""):
     p0 = [p for p in array.find("^")][0]
     d0 = "N"
 
-    logger.info(f"width={array.width}, height={array.height}")
+    print(f"width={array.width}, height={array.height}, total={array.width * array.height}")
 
     nobs = 0
     i = 0
@@ -33,7 +33,7 @@ def part2(array, loglevel: str = ""):
             continue
         i += 1
         if (i % 10) == 0:
-            logger.info(i)
+            print(i)
 
         p = p0
         d = d0
