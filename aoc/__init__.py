@@ -1,6 +1,31 @@
 from dataclasses import dataclass
 from enum import Enum
 
+class Logger:
+    LEVELS = {"WARN": 0, "INFO": 1, "DEBUG": 2}
+
+    def __init__(self, level: str="WARN"):
+        cls = self.__class__
+        self.nlevel = cls.LEVELS["WARN"]
+        if level in cls.LEVELS:
+            self.nlevel = cls.LEVELS[level]
+
+    def _print_message(self, *xs, level: str="WARN"):
+        cls = self.__class__
+        n = cls.LEVELS["WARN"]
+        if level in cls.LEVELS:
+            n = cls.LEVELS[level]
+        if n <= self.nlevel:
+            print(f"[{level}]", *xs)
+
+    def warn(self, *xs):
+        self._print_message(*xs, level="WARN")
+
+    def info(self, *xs):
+        self._print_message(*xs, level="INFO")
+
+    def debug(self, *xs):
+        self._print_message(*xs, level="DEBUG")
 
 @dataclass(frozen=True)
 class Point:
@@ -40,31 +65,45 @@ class Point:
                 curr = curr.move(dir)
                 yield curr
 
-class Logger:
-    LEVELS = {"WARN": 0, "INFO": 1, "DEBUG": 2}
+class CharArray:
+    def __init__(self, data, logger: Logger = Logger()):
+        self.logger = logger
+        self.data = data
+        self.width = len(self.data[0])
+        self.height = len(self.data)
 
-    def __init__(self, level: str="WARN"):
-        cls = self.__class__
-        self.nlevel = cls.LEVELS["WARN"]
-        if level in cls.LEVELS:
-            self.nlevel = cls.LEVELS[level]
+    @classmethod
+    def from_file(cls, filename, logger: Logger = Logger()):
+        out = []
+        with open(filename, "r") as fh:
+            for l in fh:
+                l = l.strip()
+                out.append(l)
+        return cls(out, logger=logger)
 
-    def _print_message(self, *xs, level: str="WARN"):
-        cls = self.__class__
-        n = cls.LEVELS["WARN"]
-        if level in cls.LEVELS:
-            n = cls.LEVELS[level]
-        if n <= self.nlevel:
-            print(f"[{level}]", *xs)
+    def print(self):
+        for l in self.data:
+            print(l)
 
-    def warn(self, *xs):
-        self._print_message(*xs, level="WARN")
+    def in_bounds(self, p):
+        return 0 <= p.y < self.height and 0 <= p.x < self.width
 
-    def info(self, *xs):
-        self._print_message(*xs, level="INFO")
+    def get(self, p: Point, default: str = None):
+        if self.in_bounds(p):
+            return self.data[p.y][p.x]
+        else:
+            return default
 
-    def debug(self, *xs):
-        self._print_message(*xs, level="DEBUG")
+    def enumerate(self):
+        for j in range(self.height):
+            for i in range(self.width):
+                yield Point(i, j), self.data[j][i]
+
+    def find(self, target):
+        for j, row in enumerate(self.data):
+            for i, c in enumerate(row):
+                if c == target:
+                    yield Point(i, j)
 
 @dataclass
 class Interval:
