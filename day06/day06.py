@@ -1,9 +1,7 @@
 import sys
 
 sys.path.append("..")
-from aoc import Logger, CharArray
-
-cw = {"N": "E", "E": "S", "S": "W", "W": "N"}
+from aoc import Logger, Dir, CharArray
 
 def part1(array):
     poscurr = [p for p in array.find("^")][0]
@@ -13,8 +11,8 @@ def part1(array):
     while array.in_bounds(poscurr):
         seen.add(poscurr)
         pn = poscurr.move(dircurr)
-        if array.get(pn) == "#":
-            dircurr = cw[dircurr]
+        while array.get(pn) == "#":
+            dircurr = Dir.rot_cw(dircurr)
             pn = poscurr.move(dircurr)
         poscurr = pn
     return(len(seen))
@@ -24,7 +22,7 @@ def part2(array, loglevel: str = ""):
     p0 = [p for p in array.find("^")][0]
     d0 = "N"
 
-    print(f"width={array.width}, height={array.height}, total={array.width * array.height}")
+    logger.info(f"width={array.width}, height={array.height}, total={array.width * array.height}")
 
     nobs = 0
     i = 0
@@ -32,8 +30,8 @@ def part2(array, loglevel: str = ""):
         if c != ".":
             continue
         i += 1
-        if (i % 10) == 0:
-            print(i)
+        if (i % 100) == 0:
+            logger.info(i)
 
         p = p0
         d = d0
@@ -44,8 +42,8 @@ def part2(array, loglevel: str = ""):
                 inloop = True
             seen.add((p, d))
             pn = p.move(d)
-            if array.get(pn) == "#" or pn == pobs:
-                d = cw[d]
+            while array.get(pn) == "#" or pn == pobs:
+                d = Dir.rot_cw(d)
                 pn = p.move(d)
             p = pn
         if inloop:
@@ -62,4 +60,4 @@ if __name__ == '__main__':
 
     inp = CharArray.from_file("input.txt")
     print(part1(inp))
-    print(part2(inp), loglevel="DEBUG")
+    print(part2(inp, loglevel="DEBUG"))

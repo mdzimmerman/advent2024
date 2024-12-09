@@ -1,39 +1,57 @@
 from dataclasses import dataclass
+import datetime
 from enum import Enum
 
 class Logger:
     LEVELS = {"WARN": 0, "INFO": 1, "DEBUG": 2}
 
-    def __init__(self, level: str="WARN"):
-        cls = self.__class__
-        self.nlevel = cls.LEVELS["WARN"]
-        if level in cls.LEVELS:
-            self.nlevel = cls.LEVELS[level]
+    def __init__(self, levelname: str="WARN"):
+        self.object_level = self._get_nlevel(levelname)
 
-    def _print_message(self, *xs, level: str="WARN"):
-        cls = self.__class__
-        n = cls.LEVELS["WARN"]
-        if level in cls.LEVELS:
-            n = cls.LEVELS[level]
-        if n <= self.nlevel:
-            print(f"[{level}]", *xs)
+    def _get_nlevel(self, levelname):
+        if levelname in type(self).LEVELS:
+            return type(self).LEVELS[levelname]
+        else:
+            return -1
+
+    def _print_message(self, *xs, levelname: str="WARN"):
+        msg_level = self._get_nlevel(levelname)
+        if msg_level <= self.object_level:
+            now = datetime.datetime.now()
+            print(f"{now} [{levelname}]", *xs)
 
     def warn(self, *xs):
-        self._print_message(*xs, level="WARN")
+        self._print_message(*xs, levelname="WARN")
 
     def info(self, *xs):
-        self._print_message(*xs, level="INFO")
+        self._print_message(*xs, levelname="INFO")
 
     def debug(self, *xs):
-        self._print_message(*xs, level="DEBUG")
+        self._print_message(*xs, levelname="DEBUG")
+
+class Dir:
+    ALL = ["N", "E", "S", "W"]
+
+    _CW  = {"N": "E", "E": "S", "S": "W", "W": "N"}
+    _CCW = {"N": "W", "W": "S", "S": "E", "E": "N"}
+
+    @classmethod
+    def rot_cw(cls, d):
+        return cls._CW[d]
+
+    @classmethod
+    def rot_ccw(cls, d):
+        return cls._CCW[d]
+
+class DirDiag:
+    ALL = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
 
 @dataclass(frozen=True)
 class Point:
     x: int
     y: int
 
-    MOVES_SQUARE = ["N", "E", "S", "W"]
-    MOVES_DIAG = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+
     DELTAS = dict(
         N =( 0, -1),
         NE=( 1, -1),

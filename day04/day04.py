@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("..")
-from aoc import Logger, Point
+from aoc import Logger, DirDiag, Point
 
 class Grid:
     def __init__(self, filename: str, logger: Logger=Logger()):
@@ -35,7 +35,7 @@ class Grid:
             for x in range(self.width):
                 p = Point(x, y)
                 if self.get(p) == 'X':
-                    for d in Point.MOVES_DIAG:
+                    for d in DirDiag.ALL:
                         s = "".join(self.get(pn) for pn in p.move_n(d, 3))
                         if s == "MAS":
                             self.logger.debug(p, d)
@@ -57,7 +57,7 @@ class Grid:
 
 if __name__ == '__main__':
     center = Point(10, 10)
-    for d in Point.MOVES_DIAG:
+    for d in DirDiag.ALL:
         print(d, center.move(d))
 
     print([x for x in center.move_n("NE", 3)])
