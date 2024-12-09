@@ -70,6 +70,12 @@ class Point:
         else:
             raise TypeError
 
+    def __sub__(self, other):
+        if isinstance(other, Point):
+            return Point(self.x - other.x, self.y - other.y)
+        else:
+            raise TypeError
+
     def move(self, dir):
         if dir in type(self).DELTAS:
             return self + type(self).DELTAS[dir]
@@ -84,24 +90,30 @@ class Point:
                 yield curr
 
 class CharArray:
-    def __init__(self, data, logger: Logger = Logger()):
-        self.logger = logger
+    def __init__(self, data, loglevel: str = "WARN"):
+        self.logger = Logger(loglevel)
         self.data = data
         self.width = len(self.data[0])
         self.height = len(self.data)
 
     @classmethod
-    def from_file(cls, filename, logger: Logger = Logger()):
+    def from_file(cls, filename, loglevel: str = "WARN"):
         out = []
         with open(filename, "r") as fh:
             for l in fh:
                 l = l.strip()
                 out.append(l)
-        return cls(out, logger=logger)
+        return cls(out, loglevel=loglevel)
 
-    def print(self):
-        for l in self.data:
-            print(l)
+    def print(self, overset=frozenset(), overchar="#"):
+        for j, row in enumerate(self.data):
+            for i, c in enumerate(row):
+                p = Point(i, j)
+                if p in overset:
+                    print(overchar, end="")
+                else:
+                    print(c, end="")
+            print()
 
     def in_bounds(self, p):
         return 0 <= p.y < self.height and 0 <= p.x < self.width
