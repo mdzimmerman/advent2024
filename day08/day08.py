@@ -18,26 +18,40 @@ class Antennas(CharArray):
             out[ch].append(pt)
         return out
 
-    def find_antinodes(self):
+    def find_antinodes(self, nmin=1, nmax=1):
         antinodes = set()
         for aname, apoints in self.antennas.items():
             self.logger.debug(aname, apoints)
-            for i in range(len(apoints)-1):
-                for j in range(i+1, len(apoints)):
-                    pi = apoints[i]
-                    pj = apoints[j]
-                    self.logger.debug(pi, pj)
-                    delta = pj - pi
-                    antinodes.add(pi - delta)
-                    antinodes.add(pj + delta)
+            for i, ai in enumerate(apoints[:-1]):
+                for aj in apoints[i+1:]:
+                    self.logger.debug(ai, aj)
+                    delta = aj - ai
+                    n = nmin
+                    while n <= nmax and self.in_bounds(ain := ai - delta * n):
+                        antinodes.add(ain)
+                        n += 1
+                    n = nmin
+                    while n <= nmax and self.in_bounds(ajn := aj + delta * n):
+                        antinodes.add(ajn)
+                        n += 1
         return set(filter(lambda p: self.in_bounds(p), antinodes))
+
+    def part1(self):
+        antinodes = self.find_antinodes()
+        self.debug_array(overset=antinodes)
+        return len(antinodes)
+
+    def part2(self):
+        antinodes = self.find_antinodes(nmin=0, nmax=1000)
+        self.debug_array(overset=antinodes)
+        return len(antinodes)
+
 
 if __name__ == '__main__':
     test = Antennas.from_file("test.txt", loglevel="DEBUG")
-    antinodes = test.find_antinodes()
-    test.print(overset=antinodes)
-    print(len(antinodes))
+    print(test.part1())
+    print(test.part2())
 
     inp = Antennas.from_file("input.txt")
-    antinodes = inp.find_antinodes()
-    print(len(antinodes))
+    print(inp.part1())
+    print(inp.part2())

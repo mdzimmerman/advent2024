@@ -76,6 +76,13 @@ class Point:
         else:
             raise TypeError
 
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return Point(self.x * other, self.y * other)
+        else:
+            raise TypeError
+
+
     def move(self, dir):
         if dir in type(self).DELTAS:
             return self + type(self).DELTAS[dir]
@@ -105,15 +112,24 @@ class CharArray:
                 out.append(l)
         return cls(out, loglevel=loglevel)
 
+    def debug_array(self, overset=frozenset, overchar="#"):
+        self.logger.debug("\n", *self.render(overset=overset, overchar=overchar))
+
     def print(self, overset=frozenset(), overchar="#"):
+        print("", *self.render(overset=overset, overchar=overchar),)
+
+    def render(self, overset=frozenset(), overchar="#"):
+        out = []
         for j, row in enumerate(self.data):
+            out.append("")
             for i, c in enumerate(row):
                 p = Point(i, j)
                 if p in overset:
-                    print(overchar, end="")
+                    out[-1] += overchar
                 else:
-                    print(c, end="")
-            print()
+                    out[-1] += c
+            out[-1] += "\n"
+        return out
 
     def in_bounds(self, p):
         return 0 <= p.y < self.height and 0 <= p.x < self.width
