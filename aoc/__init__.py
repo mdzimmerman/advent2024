@@ -112,6 +112,14 @@ class CharArray:
                 out.append(l)
         return cls(out, loglevel=loglevel)
 
+    @classmethod
+    def from_file_int(cls, filename, loglevel: str = "WARN"):
+        out = []
+        with open(filename, "r") as fh:
+            for l in fh:
+                out.append([int(x) for x in l.strip()])
+        return cls(out, loglevel=loglevel)
+
     def debug_array(self, overset=frozenset, overchar="#"):
         self.logger.debug("\n", *self.render(overset=overset, overchar=overchar))
 
@@ -127,7 +135,7 @@ class CharArray:
                 if p in overset:
                     out[-1] += overchar
                 else:
-                    out[-1] += c
+                    out[-1] += str(c)
             out[-1] += "\n"
         return out
 
