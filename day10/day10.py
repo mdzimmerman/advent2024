@@ -10,19 +10,19 @@ def part1(array: CharArray):
     trails = dict()
     for start in array.find(0):
         print(start)
-        trails[start] = set()
+        trails[start] = list()
 
-        seen = set()
+        #seen = list()
         queue = deque()
         queue.append((start, 0))
 
         while queue:
             pos, value = queue.popleft()
-            if pos in seen:
-                continue
-            seen.add(pos)
+            #if pos in seen:
+            #    continue
+            #seen.add(pos)
             if value == 9:
-                trails[start].add(pos)
+                trails[start].append(pos)
             else:
                 for d in Dir.ALL:
                     npos = pos.move(d)
