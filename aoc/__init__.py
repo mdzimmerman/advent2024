@@ -82,6 +82,18 @@ class Point:
         else:
             raise TypeError
 
+    def dist(self, other) -> int:
+        """
+        Calculate Manhattan distance between two points
+        :param other: second Point to calculate distance too
+        :return: distance between self and other
+        """
+
+        if isinstance(other, Point):
+            return abs(self.x - other.x) + abs(self.y - other.y)
+        else:
+            raise TypeError
+
 
     def move(self, dir):
         if dir in type(self).DELTAS:
