@@ -84,7 +84,7 @@ class Maze:
                 d = spos.dist(epos)
                 dt = (j-i)-d
                 if d <= 20 and dt > 0:
-                    print(spos, epos, dt)
+                    print(spos, epos, d, dt)
                     if dt not in hist:
                         hist[dt] = 0
                     hist[dt] += 1
@@ -102,8 +102,11 @@ if __name__ == '__main__':
     test = Maze("test.txt")
     #for p, n in test.path.items():
     #    print(p, n)
-    print(test.part1())
-    print(test.part2())
+    #print(test.part1())
+    test.grid.print()
+    for p in test.path_steps:
+        print(p)
+    #print(test.part2())
 
     print()
     print("-- input --")
