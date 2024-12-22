@@ -71,27 +71,31 @@ class Maze:
                     hist[dt] += 1
         total = 0
         for k in sorted(hist.keys()):
-            print(k, hist[k])
+            #print(k, hist[k])
             if k >= dtlimit:
                 total += hist[k]
         return total
 
-    def part2(self):
+    def part2(self, dtlimit=50):
         hist = dict()
-        for i, spos in enumerate(self.path_steps):
-            #print(i, spos)
-            for j, epos in enumerate(self.path_steps[i:]):
+        nsteps = len(self.path_steps)
+        for i in range(nsteps-1):
+            spos = self.path_steps[i]
+            for j in range(i, nsteps):
+                epos = self.path_steps[j]
                 d = spos.dist(epos)
                 dt = (j-i)-d
                 if d <= 20 and dt > 0:
-                    print(spos, epos, d, dt)
+                    #print(spos, epos, d, dt)
                     if dt not in hist:
                         hist[dt] = 0
                     hist[dt] += 1
+        total = 0
         for k in sorted(hist.keys()):
-            print(k, hist[k])
-
-
+            if k >= dtlimit:
+                #print(k, hist[k])
+                total += hist[k]
+        return total
 
         #for npos in self.move2(start):
         #    print(npos)
@@ -102,13 +106,14 @@ if __name__ == '__main__':
     test = Maze("test.txt")
     #for p, n in test.path.items():
     #    print(p, n)
-    #print(test.part1())
-    test.grid.print()
-    for p in test.path_steps:
-        print(p)
-    #print(test.part2())
+    print(test.part1())
+    #test.grid.print()
+    #for p in test.path_steps:
+    #    print(p)
+    print(test.part2())
 
     print()
     print("-- input --")
     inp = Maze("input.txt")
-    #print(inp.part1())
+    print(inp.part1())
+    print(inp.part2(dtlimit=100))
