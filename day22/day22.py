@@ -50,10 +50,23 @@ def get_patterns(prices):
     return pattern
 
 def part2(filename):
+    patterns = dict()
     with open(filename, "r") as fh:
         for l in fh:
             x = int(l.strip())
             prices = get_prices(x, n=2000)
+            patterns[x] = get_patterns(prices)
+    aggregate = dict()
+    for x, ps in patterns.items():
+        for p, price in ps.items():
+            if p not in aggregate:
+                aggregate[p] = 0
+            aggregate[p] += price
+    top = list(sorted(aggregate.items(), key=lambda x: x[1], reverse=True))[:10]
+    for t in top:
+        print(t)
+    return(top[0][1])
+
 
 if __name__ == '__main__':
     print("-- test0 --")
@@ -67,11 +80,14 @@ if __name__ == '__main__':
     print("-- test --")
     print("part 1")
     print(part1("test.txt", logger=Logger("DEBUG")))
-    print("part 2")
-    print(part2("test.txt"))
 
+    print("-- test2 --")
+    print("part 2")
+    print(part2("test2.txt"))
 
     print()
     print("-- input --")
+    print("part 1")
     print(part1("input.txt"))
-
+    print("part 2")
+    print(part2("input.txt"))
