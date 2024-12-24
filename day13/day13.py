@@ -5,6 +5,7 @@ from dataclasses import dataclass
 sys.path.append("..")
 import aoc
 from aoc import Logger, Point
+import numpy as np
 
 @dataclass
 class ClawMachine:
@@ -40,6 +41,17 @@ class ClawMachine:
         else:
             return 0
 
+    def solve2(self, delta=0):
+        A = np.array([[self.a.x, self.b.x], [self.a.y, self.b.y]])
+        P = np.array([self.prize.x, self.prize.y]) + delta
+        x = np.linalg.solve(A, P)
+        i, j = round(x[0]), round(x[1])
+        valid = (self.a.x * i + self.b.x * j) == (self.prize.x+delta) and (self.a.y * i + self.b.y * j) == (self.prize.y+delta)
+        if valid:
+            return 3 * i + j
+        else:
+            return 0
+
     @classmethod
     def parse(cls, lines: list[str]):
         out = dict()
@@ -61,11 +73,17 @@ def readfile(filename):
     return list(ClawMachine.parse(xs) for xs in aoc.split_xs(aoc.read_lines(filename), ""))
 
 if __name__ == '__main__':
+    print("-- test --")
     test = readfile("test.txt")
     for m in test:
         print(m)
-        print(m.solve())
-    print(sum(m.solve() for m in test))
+        print(m.solve2())
+        print(m.solve2(delta=10000000000000))
+    print(sum(m.solve2() for m in test))
+    print(sum(m.solve2(delta=10000000000000) for m in test))
 
+    print()
+    print("-- input --")
     inp = readfile("input.txt")
-    print(sum(m.solve() for m in inp))
+    print(sum(m.solve2() for m in inp))
+    print(sum(m.solve2(delta=10000000000000) for m in inp))
