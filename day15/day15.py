@@ -1,4 +1,5 @@
 import sys
+from collections import deque
 
 import aoc
 
@@ -58,27 +59,52 @@ class Warehouse:
     def move(self, dir):
         d = self.DIRS[dir]
         dest = self.robot.move(d)
+        queue = deque()
+        queue.append(dest)
         stack = []
-        while True:
+        while queue:
+            dest = queue.popleft()
             if dest in self.walls:
                 # can't move
+                #print()
+                #self.print()
                 return False
-            elif dest in self.boxes:
-                stack.append(dest)
-                dest = dest.move(d)
+            elif dest in self.boxes and dest not in stack:
+                if d == "N" or d == "S":
+                    c = self.boxes[dest]
+                    stack.append(dest)
+                    queue.append(dest.move(d))
+                    if c == ']':
+                        dest2 = dest.move("W")
+                        stack.append(dest2)
+                        queue.append(dest2.move(d))
+                    elif c == '[':
+                        dest2 = dest.move("E")
+                        stack.append(dest2)
+                        queue.append(dest2.move(d))
+                else:
+                    stack.append(dest)
+                    queue.append(dest.move(d))
             else:
-                # can move stack
-                if stack:
-                    for s in reversed(stack):
-                        self.boxes[s.move(d)] = self.boxes[s]
-                        del self.boxes[s]
-                self.robot = self.robot.move(d)
-                return True
+                pass
+
+        # if we got here, can move stack
+        #print(self.robot)
+        #print(d)
+        if stack:
+            #print(list(reversed(stack)))
+            for s in reversed(stack):
+                self.boxes[s.move(d)] = self.boxes[s]
+                del self.boxes[s]
+        self.robot = self.robot.move(d)
+        #print()
+        #self.print()
+        return True
 
     def gps(self):
-        return sum(100 * b.y + b.x for b in self.boxes)
+        return sum(100 * b.y + b.x for b in self.boxes if self.boxes[b] == '[' or self.boxes[b] == 'O')
 
-    def part1(self):
+    def solve(self):
         self.reset()
         for d in self.directions:
             self.move(d)
@@ -90,23 +116,23 @@ if __name__ == '__main__':
     test = Warehouse("test.txt")
     test.print()
     print()
-    print(test.part1())
+    print(test.solve())
     test.print()
 
     print("part 2")
     testx = Warehouse("test.txt", expand=True)
     testx.print()
-    testx.move("<")
     print()
+    print(testx.solve())
     testx.print()
-    testx.move("^")
-    print()
-    testx.print()
-
 
     print()
     print("-- input --")
     inp = Warehouse("input.txt")
     print("part 1")
-    print(inp.part1())
+    print(inp.solve())
+    print()
+    print("part 2")
+    inpx = Warehouse("input.txt", expand=True)
+    print(inpx.solve())
 
