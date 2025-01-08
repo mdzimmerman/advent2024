@@ -58,8 +58,10 @@ class Program:
         else:
             raise Exception()
 
-    def eval(self):
+    def eval(self, A=None):
         self.init()
+        if A is not None:
+            self.A = A
         out = []
         ptr = 0
         while 0 <= ptr < len(self.program):
@@ -107,6 +109,10 @@ if __name__ == '__main__':
     print(test)
     print("part 1")
     print(test.eval())
+    print("part 2")
+    test2 = Program("test2.txt")
+    for a in range(2024, 2024+100):
+        print(a, test2.eval(A=a))
 
     print()
     print("-- input --")
@@ -114,3 +120,7 @@ if __name__ == '__main__':
     print(inp)
     print("part 1")
     print(inp.eval())
+    print("part 2")
+    A0 = inp.register0["A"]
+    for a in range(A0, A0+100):
+        print(a, inp.eval(A=a))
