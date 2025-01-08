@@ -1,5 +1,5 @@
+import functools
 import sys
-from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -37,20 +37,29 @@ class Towels:
             out[plen].add(p)
         return out
 
+    @functools.lru_cache(maxsize=None)
+    def solutions(self, design):
+        ldesign = len(design)
+        n = 0
+        for i in self.pattern_lengths:
+            if i == ldesign:
+                if design in self.patterns[i]:
+                    n += 1
+            elif i < ldesign:
+                p = design[:i]
+                if p in self.patterns[i]:
+                    n += self.solutions(design[i:])
+        return n
+
     def find(self, design):
         queue = PriorityQueue()
         queue.append(Item(len(design), design, ""))
 
-        solutions = []
-
         while queue:
             item = queue.popleft()
-            #self.logger.debug(item.design, item.patterns)
+            self.logger.debug(item.design, item.patterns)
             if item.score == 0:
-                #return item.patterns
-                self.logger.debug(item.patterns)
-                solutions.append(item.patterns)
-                #return solutions
+                return [item.patterns]
             else:
                 for i in self.pattern_lengths:
                     p = item.design[:i]
@@ -63,7 +72,7 @@ class Towels:
                             psnew += ","
                             psnew += p
                         queue.append(Item(len(dnew), dnew, psnew))
-        return solutions
+        return []
 
     def part1(self):
         npossible = 0
@@ -75,6 +84,15 @@ class Towels:
                 npossible += 1
         return npossible
 
+    def part2(self):
+        nsolutions = 0
+        for i, design in enumerate(self.designs):
+            n = self.solutions(design)
+            self.logger.debug(design, n)
+            nsolutions += n
+        return nsolutions
+
+
 if __name__ == '__main__':
     print("-- test --")
     test = Towels("test.txt", loglevel="DEBUG")
@@ -82,10 +100,14 @@ if __name__ == '__main__':
     print(test.designs)
     print("part 1")
     print(test.part1())
+    print("part 2")
+    print(test.part2())
 
     print()
     print("-- input --")
-    inp = Towels("input.txt", loglevel="DEBUG")
+    inp = Towels("input.txt", loglevel="WARN")
     print("part 1")
     print(inp.part1())
+    print("part 2")
+    print(inp.part2())
 
