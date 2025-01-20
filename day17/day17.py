@@ -109,7 +109,9 @@ if __name__ == '__main__':
     print("part 1")
     print(test.eval())
     print("part 2")
-    print(test.eval(A=2024))
+    test2 = Program("test2.txt")
+    for a in range(2024, 2024+100):
+        print(a, test2.eval(A=a))
 
     print()
     print("-- input --")
@@ -117,3 +119,7 @@ if __name__ == '__main__':
     print(inp)
     print("part 1")
     print(inp.eval())
+    print("part 2")
+    A0 = inp.register0["A"]
+    for a in range(A0, A0+100):
+        print(a, inp.eval(A=a))

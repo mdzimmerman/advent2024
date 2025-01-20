@@ -1,4 +1,3 @@
-import heapq
 import sys
 from collections import deque
 from dataclasses import dataclass, field
@@ -6,33 +5,41 @@ from typing import Any
 
 sys.path.append("..")
 import aoc
-from aoc import CharArray
+from aoc import CharArray, Point, PriorityQueue
 
-class PriorityQueue():
-    def __init__(self):
-        self.heap = []
-
-    def __len__(self):
-        return len(self.heap)
-
-    def append(self, item):
-        heapq.heappush(self.heap, item)
-
-    def popleft(self):
-        return heapq.heappop(self.heap)
+@dataclass(frozen=True)
+class State:
+    pos: Point
+    dir: str
 
 @dataclass(order=True)
 class Item:
     score: int
-    state: Any=field(compare=False)
+    state: State=field(compare=False)
+
+def count_path_pos(starts, seen):
+    seenpos = set()
+    queue = deque()
+    for s in starts:
+        queue.append(s)
+
+    while queue:
+        state = queue.popleft()
+        print(state)
+        seenpos.add(state.pos)
+        if state in seen and seen[state] is not None:
+            for nstate in seen[state]:
+                queue.append(nstate)
+
+    return seenpos
 
 def part1(maze: CharArray):
     start = list(maze.find("S"))[0]
     end = list(maze.find("E"))[0]
-    print(start)
-    print(end)
+    #print(start)
+    #print(end)
 
-    startstate = (start, "E")
+    startstate = State(start, "E")
     seen = set()
     prev = dict()
     prev[startstate] = set()
@@ -47,7 +54,8 @@ def part1(maze: CharArray):
             continue
         seen.add(item.state)
 
-        spos, sdir = item.state
+        spos = item.state.pos
+        sdir = item.state.dir
         if spos == end:
             score = item.score
             break
@@ -55,18 +63,18 @@ def part1(maze: CharArray):
         # moves
         npos = spos.move(sdir)
         if maze.get(npos) != '#':
-            nstate = (npos, sdir)
+            nstate = State(npos, sdir)
             if nstate not in prev:
                 prev[nstate] = set()
             prev[nstate].add(item.state)
-            queue.append(Item(item.score+1, (npos, sdir)))
+            queue.append(Item(item.score+1, State(npos, sdir)))
         for ndir in (aoc.Dir.rot_cw(sdir), aoc.Dir.rot_ccw(sdir)):
             if maze.get(spos.move(ndir)) != '#':
-                nstate = (spos, ndir)
+                nstate = State(spos, ndir)
                 if nstate not in prev:
                     prev[nstate] = set()
                 prev[nstate].add(item.state)
-                queue.append(Item(item.score+1000, (spos, ndir)))
+                queue.append(Item(item.score+1000, State(spos, ndir)))
 
     best = get_best(prev, end)
 
@@ -75,7 +83,7 @@ def part1(maze: CharArray):
 def get_best(prev, end):
     best = set()
     queue = deque()
-    queue.extend(filter(lambda x: x[0] == end, (x for x in prev.keys())))
+    queue.extend(filter(lambda x: x.pos == end, (x for x in prev.keys())))
     seen = set()
     while queue:
         state = queue.popleft()
@@ -83,7 +91,7 @@ def get_best(prev, end):
             continue
         seen.add(state)
         print(state)
-        best.add(state[0])
+        best.add(state.pos)
         for nstate in prev[state]:
             queue.append(nstate)
 
