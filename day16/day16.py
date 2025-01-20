@@ -1,5 +1,6 @@
 import heapq
 import sys
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -33,9 +34,12 @@ def part1(maze: CharArray):
 
     startstate = (start, "E")
     seen = set()
+    prev = dict()
+    prev[startstate] = set()
     queue = PriorityQueue()
     queue.append(Item(0, startstate))
 
+    score = None
     while queue:
         item = queue.popleft()
 
@@ -45,21 +49,53 @@ def part1(maze: CharArray):
 
         spos, sdir = item.state
         if spos == end:
-            return item.score
+            score = item.score
+            break
 
         # moves
         npos = spos.move(sdir)
         if maze.get(npos) != '#':
+            nstate = (npos, sdir)
+            if nstate not in prev:
+                prev[nstate] = set()
+            prev[nstate].add(item.state)
             queue.append(Item(item.score+1, (npos, sdir)))
         for ndir in (aoc.Dir.rot_cw(sdir), aoc.Dir.rot_ccw(sdir)):
-            queue.append(Item(item.score+1000, (spos, ndir)))
+            if maze.get(spos.move(ndir)) != '#':
+                nstate = (spos, ndir)
+                if nstate not in prev:
+                    prev[nstate] = set()
+                prev[nstate].add(item.state)
+                queue.append(Item(item.score+1000, (spos, ndir)))
 
+    best = get_best(prev, end)
+
+    return score, best
+
+def get_best(prev, end):
+    best = set()
+    queue = deque()
+    queue.extend(filter(lambda x: x[0] == end, (x for x in prev.keys())))
+    seen = set()
+    while queue:
+        state = queue.popleft()
+        if state in seen:
+            continue
+        seen.add(state)
+        print(state)
+        best.add(state[0])
+        for nstate in prev[state]:
+            queue.append(nstate)
+
+    return best
 
 if __name__ == '__main__':
     test1 = CharArray.from_file("test1.txt")
     print(part1(test1))
-    #test1.print()
+    score, best = part1(test1)
+    print(score)
+    test1.print(overset=best, overchar="O")
 
     inp = CharArray.from_file("input.txt")
-    print(part1(inp))
+    #print(part1(inp))
 
