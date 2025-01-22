@@ -1,16 +1,24 @@
 import sys
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Any
 
 sys.path.append("..")
 import aoc
-from aoc import CharArray, Point, PriorityQueue
+from aoc import CharArray, Point, Dir, PriorityQueue
 
 @dataclass(frozen=True)
 class State:
     pos: Point
     dir: str
+
+    def forward(self):
+        return State(self.pos.move(self.dir), self.dir)
+
+    def rot_cw(self):
+        return State(self.pos, Dir.rot_cw(self.dir))
+
+    def rot_ccw(self):
+        return State(self.pos, Dir.rot_ccw(self.dir))
 
 @dataclass(order=True)
 class Item:
@@ -33,14 +41,12 @@ def count_path_pos(starts, seen):
 
     return seenpos
 
-def part1(maze: CharArray):
+def solve(maze: CharArray):
     start = list(maze.find("S"))[0]
     end = list(maze.find("E"))[0]
-    #print(start)
-    #print(end)
 
     startstate = State(start, "E")
-    seen = set()
+    seen = dict()
     prev = dict()
     prev[startstate] = set()
     queue = PriorityQueue()
@@ -52,29 +58,24 @@ def part1(maze: CharArray):
 
         if item.state in seen:
             continue
-        seen.add(item.state)
+        seen[item.state] = item.score
 
-        spos = item.state.pos
-        sdir = item.state.dir
-        if spos == end:
+        if item.state.pos == end:
             score = item.score
             break
 
         # moves
-        npos = spos.move(sdir)
-        if maze.get(npos) != '#':
-            nstate = State(npos, sdir)
-            if nstate not in prev:
-                prev[nstate] = set()
-            prev[nstate].add(item.state)
-            queue.append(Item(item.score+1, State(npos, sdir)))
-        for ndir in (aoc.Dir.rot_cw(sdir), aoc.Dir.rot_ccw(sdir)):
-            if maze.get(spos.move(ndir)) != '#':
-                nstate = State(spos, ndir)
+        nstates = [(item.state.forward(), item.score+1),
+                   (item.state.rot_cw(),  item.score+1000),
+                   (item.state.rot_ccw(), item.score+1000)]
+
+        for nstate, nscore in nstates:
+            if maze.get(nstate.pos) != '#':
                 if nstate not in prev:
                     prev[nstate] = set()
-                prev[nstate].add(item.state)
-                queue.append(Item(item.score+1000, State(spos, ndir)))
+                if nstate not in seen: # or seen[nstate] > nscore:
+                    prev[nstate].add(item.state)
+                queue.append(Item(nscore, nstate))
 
     best = get_best(prev, end)
 
@@ -90,7 +91,7 @@ def get_best(prev, end):
         if state in seen:
             continue
         seen.add(state)
-        print(state)
+        #print(state)
         best.add(state.pos)
         for nstate in prev[state]:
             queue.append(nstate)
@@ -98,12 +99,26 @@ def get_best(prev, end):
     return best
 
 if __name__ == '__main__':
+    print("-- test 1 --")
     test1 = CharArray.from_file("test1.txt")
-    print(part1(test1))
-    score, best = part1(test1)
-    print(score)
+    score, best = solve(test1)
+    print(f"score = {score}")
+    print(f"best = {len(best)}")
     test1.print(overset=best, overchar="O")
 
+    print()
+    print("-- test 2 --")
+    test2 = CharArray.from_file("test2.txt")
+    score, best = solve(test2)
+    print(f"score = {score}")
+    print(f"best = {len(best)}")
+    test2.print(overset=best, overchar="O")
+
+    print()
+    print("-- input --")
     inp = CharArray.from_file("input.txt")
-    #print(part1(inp))
+    score, best = solve(inp)
+    print(f"score = {score}")
+    print(f"best = {len(best)}")
+    inp.print(overset=best, overchar="O")
 
