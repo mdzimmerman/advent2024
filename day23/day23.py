@@ -22,9 +22,11 @@ class Graph:
             if a not in nodes:
                 nodes.append(a)
                 neighbors[a] = set()
+                neighbors[a].add(a)
             if b not in nodes:
                 nodes.append(b)
                 neighbors[b] = set()
+                neighbors[b].add(b)
             neighbors[a].add(b)
             neighbors[b].add(a)
         for n in nodes:
@@ -44,8 +46,15 @@ class Graph:
                     if nj in self.neighbors[ni] and nk in self.neighbors[nj] and ni in self.neighbors[nk]:
                         if {ni, nj, nk}.intersection(self.tnodes):
                             count += 1
-                            print(ni, nj, nk)
+                            #print(ni, nj, nk)
         return count
+
+    def part2(self):
+        groups = list(set())
+        for n1 in self.nodes:
+            for n2 in self.neighbors[n1]:
+                if n2 != n1:
+                    print(n1, n2, self.neighbors[n1].intersection(self.neighbors[n2]))
 
 if __name__ == '__main__':
     test = Graph("test.txt")
@@ -54,6 +63,7 @@ if __name__ == '__main__':
     for k, v in test.neighbors.items():
         print(k, v)
     print(test.part1())
+    print(test.part2())
 
     print()
     inp = Graph("input.txt")
