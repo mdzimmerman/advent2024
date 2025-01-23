@@ -83,6 +83,9 @@ class Point:
         else:
             raise TypeError
 
+    def __repr__(self):
+        return f"Point({self.x} {self.y})"
+
     def dist(self, other) -> int:
         """
         Calculate Manhattan distance between two points
