@@ -1,3 +1,4 @@
+import functools
 import itertools
 import sys
 
@@ -23,6 +24,7 @@ class Pad:
                     self.keyname[p] = c
             j += 1
 
+
 NUMERIC_PAD = Pad("""
 789
 456
@@ -35,16 +37,40 @@ DIRECTIONAL_PAD = Pad("""
 <v>
 """)
 
-def move(ks):
-    d1 = "".join(move_and_press(k1, k2, NUMERIC_PAD) for k1, k2 in itertools.pairwise("A"+ks))
-    d2 = "".join(move_and_press(k1, k2, DIRECTIONAL_PAD) for k1, k2 in itertools.pairwise("A"+d1))
-    d3 = "".join(move_and_press(k1, k2, DIRECTIONAL_PAD) for k1, k2 in itertools.pairwise("A"+d2))
-    print(d3)
-    print(d2)
-    print(d1)
-    print(ks)
+def part1(codes: list[str], logger: Logger=Logger("WARN")):
+    for c in codes:
+        len(c)
 
-def move_and_press(k1, k2, destpad):
+def complexity(ks):
+    pass
+
+def move(ks, logger: Logger=Logger("WARN")):
+    d1 = move_numeric(ks)
+    d2 = move_directional(d1)
+    d3 = move_directional(d2)
+    logger.debug(d3, len(d3))
+    logger.debug(d2, len(d2))
+    logger.debug(d1, len(d1))
+    logger.debug(ks, len(ks))
+    return len(d3)
+
+def move_numeric(ks):
+    out = "".join(move_press_numeric(k1, k2) for k1, k2 in itertools.pairwise("A"+ks))
+    return out
+
+def move_directional(ks):
+    out = "".join(move_press_directional(k1, k2) for k1, k2 in itertools.pairwise("A"+ks))
+    return out
+
+@functools.cache
+def move_press_numeric(k1, k2):
+    return move_press(k1, k2, NUMERIC_PAD)
+
+@functools.cache
+def move_press_directional(k1, k2):
+    return move_press(k1, k2, DIRECTIONAL_PAD)
+
+def move_press(k1, k2, destpad):
     p1 = destpad.position[k1]
     p2 = destpad.position[k2]
     diff = p2 - p1
@@ -59,11 +85,11 @@ def move_and_press(k1, k2, destpad):
                 break
         pathx = "<" * abs(diff.x)
     elif diff.x > 0:
-        pathx = ">" * diff.x
         for x in range(p1.x, p1.x+1, 1):
             p = Point(x, p1.y)
             if p not in destpad.keyname:
                 ewfirst = False
+        pathx = ">" * diff.x
     pathy = ""
     if diff.y < 0:
         pathy = "^" * abs(diff.y)
@@ -81,4 +107,4 @@ if __name__ == '__main__':
     #print(DIRECTIONAL_PAD.keyname)
 
     #print(move("A", "7", NUMERIC_PAD))
-    print(move("A029A"))
+    move("029A", logger=Logger("DEBUG"))
