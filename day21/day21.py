@@ -2,6 +2,8 @@ import functools
 import itertools
 import sys
 
+import aoc
+
 sys.path.append("..")
 from aoc import Logger, Point
 
@@ -38,11 +40,14 @@ DIRECTIONAL_PAD = Pad("""
 """)
 
 def part1(codes: list[str], logger: Logger=Logger("WARN")):
+    total = 0
     for c in codes:
-        len(c)
-
-def complexity(ks):
-    pass
+        pat = move(c)
+        val = int(c[:-1])
+        score = val * len(pat)
+        logger.debug(c, pat, val, len(pat), score)
+        total += score
+    return total
 
 def move(ks, logger: Logger=Logger("WARN")):
     d1 = move_numeric(ks)
@@ -52,7 +57,7 @@ def move(ks, logger: Logger=Logger("WARN")):
     logger.debug(d2, len(d2))
     logger.debug(d1, len(d1))
     logger.debug(ks, len(ks))
-    return len(d3)
+    return d3
 
 def move_numeric(ks):
     out = "".join(move_press_numeric(k1, k2) for k1, k2 in itertools.pairwise("A"+ks))
@@ -101,10 +106,7 @@ def move_press(k1, k2, destpad):
         return pathy+pathx+"A"
 
 if __name__ == '__main__':
-    #print(NUMERIC_PAD.position)
-    #print(NUMERIC_PAD.keyname)
-    #print(DIRECTIONAL_PAD.position)
-    #print(DIRECTIONAL_PAD.keyname)
+    test = aoc.read_lines("test.txt")
+    move(test[0], logger=Logger("DEBUG"))
+    print(part1(test, logger=Logger("DEBUG")))
 
-    #print(move("A", "7", NUMERIC_PAD))
-    move("029A", logger=Logger("DEBUG"))
