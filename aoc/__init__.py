@@ -5,6 +5,9 @@ from enum import Enum
 
 class Logger:
     LEVELS = {"WARN": 0, "INFO": 1, "DEBUG": 2}
+    WARN =  None
+    INFO = None
+    DEBUG = None
 
     def __init__(self, levelname: str="WARN"):
         self.object_level = self._get_nlevel(levelname)
@@ -29,6 +32,10 @@ class Logger:
 
     def debug(self, *xs):
         self._print_message(*xs, levelname="DEBUG")
+
+Logger.DEBUG = Logger("DEBUG")
+Logger.INFO = Logger("INFO")
+Logger.WARN = Logger("WARN")
 
 class Dir:
     ALL = ["N", "E", "S", "W"]
