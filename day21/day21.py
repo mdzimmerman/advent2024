@@ -23,11 +23,24 @@ class Pad:
                 continue
             for i, c in enumerate(line):
                 p = Point(i, j)
-                if c != " ":
-                    self.position[c] = p
-                    self.keyname[p] = c
+                self.position[c] = p
+                self.keyname[p] = c
             j += 1
 
+    def is_blocked(self, start: Point, dir: str, nsteps: int):
+        space = self.position[" "]
+        xrange = [start.x, start.x]
+        yrange = [start.y, start.y]
+        if dir == '<':
+            xrange[0] = start.x-nsteps
+        elif dir == '>':
+            xrange[1] = start.x+nsteps
+        elif dir == '^':
+            yrange[0] = start.y-nsteps
+        elif dir == "v":
+            yrange[1] = start.y+nsteps
+
+        return xrange[0] <= space.x <= xrange[1] and yrange[0] <= space.y <= yrange[1]
 
 NUMERIC_PAD = Pad("""
 789
@@ -85,18 +98,12 @@ def move_press(k1, k2, destpad):
     pathx = ""
     ewfirst = True
     if diff.x < 0:
-        for x in range(p1.x, p2.x-1, -1):
-            p = Point(x, p1.y)
-            #print(p)
-            if p not in destpad.keyname:
-                ewfirst = False
-                break
+        if destpad.is_blocked(p1, "<", abs(diff.x)):
+            ewfirst = False
         pathx = "<" * abs(diff.x)
     elif diff.x > 0:
-        for x in range(p1.x, p2.x+1, 1):
-            p = Point(x, p1.y)
-            if p not in destpad.keyname:
-                ewfirst = False
+        if destpad.is_blocked(p1, ">", abs(diff.x)):
+            ewfirst = False
         pathx = ">" * diff.x
     pathy = ""
     if diff.y < 0:
@@ -107,6 +114,7 @@ def move_press(k1, k2, destpad):
         return pathx+pathy+"A"
     else:
         return pathy+pathx+"A"
+
 
 if __name__ == '__main__':
     print(NUMERIC_PAD.layout)
